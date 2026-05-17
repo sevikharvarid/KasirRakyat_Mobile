@@ -1,4 +1,4 @@
-# kasir_rakyat
+# KasirRakyat
 
 A new Flutter project.
 
