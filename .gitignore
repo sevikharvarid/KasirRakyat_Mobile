@@ -48,3 +48,4 @@ app.*.map.json
 *.jks
 *.jks
 android/app/key.properties
+service-account.json
