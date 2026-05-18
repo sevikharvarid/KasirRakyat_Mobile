@@ -32,7 +32,8 @@ class _CartScreenState extends State<CartScreen> {
 
   static int _tax(int subtotal) => (subtotal * 11 / 100).round();
   static int _total(int subtotal) => subtotal + _tax(subtotal);
-  int _change(int total) => _amountReceived >= total ? _amountReceived - total : 0;
+  int _change(int total) =>
+      _amountReceived >= total ? _amountReceived - total : 0;
 
   bool _canPay(CartState state) {
     if (state.items.isEmpty) return false;
@@ -65,12 +66,14 @@ class _CartScreenState extends State<CartScreen> {
       storeAddress: profile.address ?? '',
       storePhone: profile.phone ?? '',
       items: state.items
-          .map((item) => ReceiptItem(
-                name: item.product.name,
-                quantity: item.quantity,
-                unitPrice: item.product.sellPrice,
-                subtotal: item.subtotal,
-              ))
+          .map(
+            (item) => ReceiptItem(
+              name: item.product.name,
+              quantity: item.quantity,
+              unitPrice: item.product.sellPrice,
+              subtotal: item.subtotal,
+            ),
+          )
           .toList(),
       subtotal: subtotal,
       tax: tax,
@@ -81,26 +84,30 @@ class _CartScreenState extends State<CartScreen> {
     );
 
     // Record transaction to shared store so Reports can read real data
-    AppDataStore.instance.recordTransaction(AppTransaction(
-      id: id,
-      createdAt: now,
-      items: state.items
-          .map((item) => AppTxItem(
+    AppDataStore.instance.recordTransaction(
+      AppTransaction(
+        id: id,
+        createdAt: now,
+        items: state.items
+            .map(
+              (item) => AppTxItem(
                 productId: item.product.id,
                 productName: item.product.name,
                 unitPrice: item.product.sellPrice,
                 buyPrice: item.product.buyPrice,
                 quantity: item.quantity,
                 subtotal: item.subtotal,
-              ))
-          .toList(),
-      subtotal: subtotal,
-      tax: tax,
-      total: total,
-      paymentMethod: _method,
-      amountPaid: _method == PaymentMethod.tunai ? _amountReceived : total,
-      change: change,
-    ));
+              ),
+            )
+            .toList(),
+        subtotal: subtotal,
+        tax: tax,
+        total: total,
+        paymentMethod: _method,
+        amountPaid: _method == PaymentMethod.tunai ? _amountReceived : total,
+        change: change,
+      ),
+    );
 
     context.read<CartCubit>().clearCart();
 
@@ -187,13 +194,10 @@ class _CartAppBar extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text(
-            'KasirRakyat',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
-            ),
+          title: Image.asset(
+            'assets/images/app_logo.png',
+            height: 40,
+            fit: BoxFit.contain,
           ),
           actions: [
             Padding(
@@ -272,7 +276,11 @@ class _ItemsList extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 32),
           child: Column(
             children: [
-              Icon(Icons.shopping_cart_outlined, size: 48, color: AppColors.border),
+              Icon(
+                Icons.shopping_cart_outlined,
+                size: 48,
+                color: AppColors.border,
+              ),
               SizedBox(height: 12),
               Text(
                 'Keranjang kosong',
@@ -295,7 +303,8 @@ class _ItemsList extends StatelessWidget {
           item: item,
           maxStock: item.product.stock,
           onAdd: () => context.read<CartCubit>().addProduct(item.product),
-          onRemove: () => context.read<CartCubit>().removeProduct(item.product.id),
+          onRemove: () =>
+              context.read<CartCubit>().removeProduct(item.product.id),
           onDelete: () => context.read<CartCubit>().deleteItem(item.product.id),
         );
       },
@@ -454,7 +463,10 @@ class _AmountSection extends StatelessWidget {
               hintStyle: const TextStyle(color: AppColors.textTertiary),
               filled: true,
               fillColor: AppColors.background,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: AppColors.border),
@@ -465,7 +477,10 @@ class _AmountSection extends StatelessWidget {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
               ),
             ),
           ),
@@ -612,7 +627,10 @@ class _Row extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
         const Spacer(),
         Text(
           value,
@@ -626,4 +644,3 @@ class _Row extends StatelessWidget {
     );
   }
 }
-

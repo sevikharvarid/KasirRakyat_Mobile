@@ -51,3 +51,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           releaseNotes: "Build from commit ${{ github.sha }}"
           file: build/app/outputs/flutter-apk/app-release.apk
+          groups: Internal Tester

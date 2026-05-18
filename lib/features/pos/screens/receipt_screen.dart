@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:kasir_rakyat/core/constants/app_colors.dart';
 import 'package:kasir_rakyat/core/services/printer_service.dart';
 import 'package:kasir_rakyat/core/utils/currency_formatter.dart';
-import 'package:kasir_rakyat/core/widgets/kr_bottom_nav.dart';
 import 'package:kasir_rakyat/features/pos/models/payment_method.dart';
 import 'package:kasir_rakyat/features/pos/models/receipt_data.dart';
 import 'package:share_plus/share_plus.dart';
@@ -17,7 +16,6 @@ class ReceiptScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primarySurface,
-      bottomNavigationBar: const KrBottomNav(currentIndex: 0),
       body: Column(
         children: [
           const _Header(),
@@ -61,24 +59,10 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Container(
-                  width: 22,
-                  height: 22,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.check, color: Colors.white, size: 14),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'KasirRakyat',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
-                    letterSpacing: -0.3,
-                  ),
+                Image.asset(
+                  'assets/images/app_logo.png',
+                  height: 40,
+                  fit: BoxFit.contain,
                 ),
                 const Spacer(),
                 Container(
@@ -88,7 +72,11 @@ class _Header extends StatelessWidget {
                     color: AppColors.primaryChipInactive,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.person_outline, color: AppColors.textSecondary, size: 20),
+                  child: const Icon(
+                    Icons.person_outline,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
                 ),
               ],
             ),
@@ -158,7 +146,11 @@ class _ReceiptCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
         boxShadow: const [
-          BoxShadow(color: Color(0x0A000000), blurRadius: 12, offset: Offset(0, 4)),
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -212,7 +204,10 @@ class _StoreHeader extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             data.storePhone,
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -274,7 +269,20 @@ class _TransactionMeta extends StatelessWidget {
   }
 
   String _formatDate(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Ags',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
     final hour = dt.hour.toString().padLeft(2, '0');
     final min = dt.minute.toString().padLeft(2, '0');
     return '${dt.day} ${months[dt.month - 1]} ${dt.year}, $hour:$min';
@@ -288,9 +296,7 @@ class _ItemsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: items.map((item) => _ItemRow(item: item)).toList(),
-    );
+    return Column(children: items.map((item) => _ItemRow(item: item)).toList());
   }
 }
 
@@ -321,7 +327,10 @@ class _ItemRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   '${item.quantity} x ${formatRupiah(item.unitPrice)}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -390,9 +399,15 @@ class _TotalRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
         const Spacer(),
-        Text(value, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+        ),
       ],
     );
   }
@@ -416,7 +431,11 @@ class _PaymentRow extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.payments_outlined, color: AppColors.primary, size: 18),
+              const Icon(
+                Icons.payments_outlined,
+                color: AppColors.primary,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               Text(
                 data.paymentMethod.label,
@@ -469,7 +488,10 @@ class _ActionButtons extends StatelessWidget {
   const _ActionButtons({required this.data});
 
   String _buildReceiptText() {
-    final dateStr = DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(data.createdAt);
+    final dateStr = DateFormat(
+      'dd MMM yyyy, HH:mm',
+      'id_ID',
+    ).format(data.createdAt);
     final buf = StringBuffer();
 
     buf.writeln('*${data.storeName}*');
@@ -482,7 +504,9 @@ class _ActionButtons extends StatelessWidget {
 
     for (final item in data.items) {
       buf.writeln('${item.name}');
-      buf.writeln('  ${item.quantity} x ${formatRupiah(item.unitPrice)} = ${formatRupiah(item.subtotal)}');
+      buf.writeln(
+        '  ${item.quantity} x ${formatRupiah(item.unitPrice)} = ${formatRupiah(item.subtotal)}',
+      );
     }
 
     buf.writeln('─────────────────────');
@@ -492,7 +516,9 @@ class _ActionButtons extends StatelessWidget {
     }
     buf.writeln('*Total: ${formatRupiah(data.total)}*');
     buf.writeln('');
-    buf.writeln('Bayar (${data.paymentMethod.label}): ${formatRupiah(data.amountPaid)}');
+    buf.writeln(
+      'Bayar (${data.paymentMethod.label}): ${formatRupiah(data.amountPaid)}',
+    );
     if (data.change > 0) {
       buf.writeln('Kembalian: ${formatRupiah(data.change)}');
     }
@@ -515,7 +541,8 @@ class _ActionButtons extends StatelessWidget {
           width: double.infinity,
           height: 52,
           child: ElevatedButton.icon(
-            onPressed: () => PrinterService.printReceipt(context: context, data: data),
+            onPressed: () =>
+                PrinterService.printReceipt(context: context, data: data),
             icon: const Icon(Icons.bluetooth, color: Colors.white, size: 20),
             label: const Text(
               'Cetak Struk (Bluetooth)',
@@ -527,7 +554,9 @@ class _ActionButtons extends StatelessWidget {
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               elevation: 0,
             ),
           ),
@@ -540,7 +569,11 @@ class _ActionButtons extends StatelessWidget {
                 height: 48,
                 child: OutlinedButton.icon(
                   onPressed: () => _shareReceipt(context),
-                  icon: const Icon(Icons.share_outlined, size: 18, color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.share_outlined,
+                    size: 18,
+                    color: AppColors.textPrimary,
+                  ),
                   label: const Text(
                     'Bagikan WhatsApp',
                     style: TextStyle(
@@ -551,7 +584,9 @@ class _ActionButtons extends StatelessWidget {
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.border),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -565,7 +600,11 @@ class _ActionButtons extends StatelessWidget {
                     // Pop back to POS screen
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
-                  icon: const Icon(Icons.add_circle_outline, size: 18, color: Colors.white),
+                  icon: const Icon(
+                    Icons.add_circle_outline,
+                    size: 18,
+                    color: Colors.white,
+                  ),
                   label: const Text(
                     'Transaksi Baru',
                     style: TextStyle(
@@ -576,7 +615,9 @@ class _ActionButtons extends StatelessWidget {
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.warning,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     elevation: 0,
                   ),
                 ),
@@ -631,7 +672,10 @@ class _PromoBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(99),
