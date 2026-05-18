@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "656334404303",
+    "firebase_url": "https://projectke2-badfd.firebaseio.com",
+    "project_id": "projectke2-badfd",
+    "storage_bucket": "projectke2-badfd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:656334404303:android:2d2fd3df29ea30dd8695ba",
+        "android_client_info": {
+          "package_name": "com.kasirrakyat.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfq2TJ1bnxeayxZphl9-C3HH23w2gTfYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

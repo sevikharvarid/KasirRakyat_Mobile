@@ -44,3 +44,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+*.jks
+*.jks
+android/app/key.properties
+service-account.json
