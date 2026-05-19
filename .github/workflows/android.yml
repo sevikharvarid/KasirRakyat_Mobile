@@ -79,7 +79,7 @@ jobs:
         with:
           repository: sevikharvarid/kasirrakyat-secrets
           ref: refs/heads/main
-          token: ${{ secrets.SECRETS_TOKEN }}
+          token: ${{ secrets.SECRET_TOKEN }}
           path: secrets    
 
       - name: Download built APK
