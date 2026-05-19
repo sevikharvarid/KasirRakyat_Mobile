@@ -65,19 +65,6 @@ class _Header extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
                 const Spacer(),
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryChipInactive,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.person_outline,
-                    color: AppColors.textSecondary,
-                    size: 20,
-                  ),
-                ),
               ],
             ),
           ),

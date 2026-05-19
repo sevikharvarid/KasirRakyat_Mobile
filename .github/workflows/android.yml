@@ -4,51 +4,94 @@ on:
   push:
     branches:
       - production
-
+      
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      BUILD_NUMBER: ${{ github.run_number }}
+      SECRETS_TOKEN: ${{ secrets.SECRET_TOKEN }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          path: project
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Checkout secrets repo
+        uses: actions/checkout@v4
         with:
-          flutter-version: '3.x'
-          channel: 'stable'
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Decode keystore
+          repository: sevikharvarid/kasirrakyat-secrets
+          ref: refs/heads/production
+          token: ${{ env.SECRETS_TOKEN }}
+          path: secrets
+      
+      - name: Copy build keys to project
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/kasir_rakyat.jks
-
-      - name: Create key.properties
+          cp secrets/Env/key.properties project/android/app/
+          cp secrets/Env/kasir_rakyat.jks project/android/app/     
+          cp secrets/Docker/Dockerfile project/  
+      
+      - name: Increment build number
         run: |
-          cat > android/app/key.properties <<EOF
-          storePassword=${{ secrets.STORE_PASSWORD }}
-          keyPassword=${{ secrets.KEY_PASSWORD }}
-          keyAlias=${{ secrets.KEY_ALIAS }}
-          storeFile=kasir_rakyat.jks
-          EOF
+          cd project
+          current_version_number=$(awk '/version:/ {print $2}' pubspec.yaml | cut -d'+' -f1)
+          new_version="$current_version_number+$BUILD_NUMBER"
+          echo "version: $new_version"
+          sed -i "s/version: .*/version: $new_version/" pubspec.yaml     
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build Docker Image
+        run: |
+          cd project
+          docker build -t flutter-apk .    
+      
+      - name: Extract Android APK File
+        run: |
+          cd project
+          docker cp $(docker create --rm flutter-apk):/output/app-release.apk ./app-release.apk
 
-      - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
+      - name: Upload build to Artifact
+        uses: actions/upload-artifact@v4
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          releaseNotes: "Build from commit ${{ github.sha }}"
-          file: build/app/outputs/flutter-apk/app-release.apk
-          groups: Internal Tester
+          name: app-release
+          path: project/app-release.apk     
+
+      # - name: Setup Java
+      #   uses: actions/setup-java@v4
+      #   with:
+      #     distribution: 'zulu'
+      #     java-version: '17'
+
+      # - name: Setup Flutter
+      #   uses: subosito/flutter-action@v2
+      #   with:
+      #     flutter-version: '3.x'
+      #     channel: 'stable'
+
+      # - name: Get dependencies
+      #   run: flutter pub get
+
+      # - name: Decode keystore
+      #   run: |
+      #     echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/kasir_rakyat.jks
+
+      # - name: Create key.properties
+      #   run: |
+      #     cat > android/app/key.properties <<EOF
+      #     storePassword=${{ secrets.STORE_PASSWORD }}
+      #     keyPassword=${{ secrets.KEY_PASSWORD }}
+      #     keyAlias=${{ secrets.KEY_ALIAS }}
+      #     storeFile=kasir_rakyat.jks
+      #     EOF
+
+      # - name: Build APK
+      #   run: flutter build apk --release
+
+      # - name: Upload to Firebase App Distribution
+      #   uses: wzieba/Firebase-Distribution-Github-Action@v1
+      #   with:
+      #     appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+      #     serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      #     releaseNotes: "Build from commit ${{ github.sha }}"
+      #     file: build/app/outputs/flutter-apk/app-release.apk
