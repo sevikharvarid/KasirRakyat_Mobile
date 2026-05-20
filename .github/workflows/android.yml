@@ -94,21 +94,21 @@ jobs:
 
       - name: Copy Fastfile to project
         run: |
-          cp -r secrets/Fastlane project/
+          cp -r secrets/fastlane project/
 
       - name: Setup Ruby and Fastlane
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 'ruby'
           bundler-cache: true
-          working-directory: project/Fastlane
+          working-directory: project/fastlane
       
       - name: Deploy with fastlane
         env:
           APP_ID_ANDROID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
           cd project
-          cd Fastlane
+          cd fastlane
           bundle exec fastlane android distribute        
 
       # - name: Setup Java

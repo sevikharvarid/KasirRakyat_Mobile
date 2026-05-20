@@ -1,3 +1,4 @@
+import 'package:kasir_rakyat/features/settings/models/printer_settings.dart';
 import 'package:kasir_rakyat/features/settings/models/store_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +12,9 @@ class SettingsRepository {
   static const _kOwnerName = 'owner_name';
   static const _kNotifLowStock = 'notif_low_stock';
   static const _kPrintReceiptAuto = 'print_receipt_auto';
+  static const _kPrinterAddress = 'printer_address';
+  static const _kPrinterName = 'printer_name';
+  static const _kPrinterPaperSize = 'printer_paper_size';
 
   late SharedPreferences _prefs;
 
@@ -27,9 +31,7 @@ class SettingsRepository {
     );
   }
 
-  Future<StoreProfile> getProfile() async {
-    return getProfileSync();
-  }
+  Future<StoreProfile> getProfile() async => getProfileSync();
 
   Future<void> saveProfile(StoreProfile profile) async {
     await _prefs.setString(_kStoreName, profile.name);
@@ -56,5 +58,31 @@ class SettingsRepository {
 
   Future<void> setPrintReceiptAuto(bool value) async {
     await _prefs.setBool(_kPrintReceiptAuto, value);
+  }
+
+  PrinterSettings? getPrinterSettingsSync() {
+    final address = _prefs.getString(_kPrinterAddress);
+    if (address == null || address.isEmpty) return null;
+    final name = _prefs.getString(_kPrinterName) ?? 'Printer';
+    final paperSizeRaw = _prefs.getString(_kPrinterPaperSize) ?? 'mm58';
+    final paperSize = paperSizeRaw == 'mm80'
+        ? ThermalPaperSize.mm80
+        : ThermalPaperSize.mm58;
+    return PrinterSettings(address: address, name: name, paperSize: paperSize);
+  }
+
+  Future<PrinterSettings?> getPrinterSettings() async =>
+      getPrinterSettingsSync();
+
+  Future<void> savePrinterSettings(PrinterSettings settings) async {
+    await _prefs.setString(_kPrinterAddress, settings.address);
+    await _prefs.setString(_kPrinterName, settings.name);
+    await _prefs.setString(_kPrinterPaperSize, settings.paperSize.name);
+  }
+
+  Future<void> clearPrinterSettings() async {
+    await _prefs.remove(_kPrinterAddress);
+    await _prefs.remove(_kPrinterName);
+    await _prefs.remove(_kPrinterPaperSize);
   }
 }

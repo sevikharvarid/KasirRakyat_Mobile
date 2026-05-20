@@ -26,6 +26,7 @@ mixin _$SettingsState {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )
     loaded,
     required TResult Function(String message) error,
@@ -39,6 +40,7 @@ mixin _$SettingsState {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult? Function(String message)? error,
@@ -52,6 +54,7 @@ mixin _$SettingsState {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult Function(String message)? error,
@@ -153,6 +156,7 @@ class _$InitialImpl implements _Initial {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )
     loaded,
     required TResult Function(String message) error,
@@ -170,6 +174,7 @@ class _$InitialImpl implements _Initial {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult? Function(String message)? error,
@@ -187,6 +192,7 @@ class _$InitialImpl implements _Initial {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult Function(String message)? error,
@@ -290,6 +296,7 @@ class _$LoadingImpl implements _Loading {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )
     loaded,
     required TResult Function(String message) error,
@@ -307,6 +314,7 @@ class _$LoadingImpl implements _Loading {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult? Function(String message)? error,
@@ -324,6 +332,7 @@ class _$LoadingImpl implements _Loading {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult Function(String message)? error,
@@ -389,6 +398,7 @@ abstract class _$$LoadedImplCopyWith<$Res> {
     bool notifLowStock,
     bool printReceiptAuto,
     String appVersion,
+    PrinterSettings? defaultPrinter,
   });
 }
 
@@ -410,6 +420,7 @@ class __$$LoadedImplCopyWithImpl<$Res>
     Object? notifLowStock = null,
     Object? printReceiptAuto = null,
     Object? appVersion = null,
+    Object? defaultPrinter = freezed,
   }) {
     return _then(
       _$LoadedImpl(
@@ -429,6 +440,10 @@ class __$$LoadedImplCopyWithImpl<$Res>
             ? _value.appVersion
             : appVersion // ignore: cast_nullable_to_non_nullable
                   as String,
+        defaultPrinter: freezed == defaultPrinter
+            ? _value.defaultPrinter
+            : defaultPrinter // ignore: cast_nullable_to_non_nullable
+                  as PrinterSettings?,
       ),
     );
   }
@@ -442,6 +457,7 @@ class _$LoadedImpl implements _Loaded {
     this.notifLowStock = false,
     this.printReceiptAuto = true,
     this.appVersion = '1.0.0',
+    this.defaultPrinter,
   });
 
   @override
@@ -455,10 +471,12 @@ class _$LoadedImpl implements _Loaded {
   @override
   @JsonKey()
   final String appVersion;
+  @override
+  final PrinterSettings? defaultPrinter;
 
   @override
   String toString() {
-    return 'SettingsState.loaded(profile: $profile, notifLowStock: $notifLowStock, printReceiptAuto: $printReceiptAuto, appVersion: $appVersion)';
+    return 'SettingsState.loaded(profile: $profile, notifLowStock: $notifLowStock, printReceiptAuto: $printReceiptAuto, appVersion: $appVersion, defaultPrinter: $defaultPrinter)';
   }
 
   @override
@@ -472,7 +490,9 @@ class _$LoadedImpl implements _Loaded {
             (identical(other.printReceiptAuto, printReceiptAuto) ||
                 other.printReceiptAuto == printReceiptAuto) &&
             (identical(other.appVersion, appVersion) ||
-                other.appVersion == appVersion));
+                other.appVersion == appVersion) &&
+            (identical(other.defaultPrinter, defaultPrinter) ||
+                other.defaultPrinter == defaultPrinter));
   }
 
   @override
@@ -482,6 +502,7 @@ class _$LoadedImpl implements _Loaded {
     notifLowStock,
     printReceiptAuto,
     appVersion,
+    defaultPrinter,
   );
 
   /// Create a copy of SettingsState
@@ -502,11 +523,18 @@ class _$LoadedImpl implements _Loaded {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )
     loaded,
     required TResult Function(String message) error,
   }) {
-    return loaded(profile, notifLowStock, printReceiptAuto, appVersion);
+    return loaded(
+      profile,
+      notifLowStock,
+      printReceiptAuto,
+      appVersion,
+      defaultPrinter,
+    );
   }
 
   @override
@@ -519,11 +547,18 @@ class _$LoadedImpl implements _Loaded {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult? Function(String message)? error,
   }) {
-    return loaded?.call(profile, notifLowStock, printReceiptAuto, appVersion);
+    return loaded?.call(
+      profile,
+      notifLowStock,
+      printReceiptAuto,
+      appVersion,
+      defaultPrinter,
+    );
   }
 
   @override
@@ -536,13 +571,20 @@ class _$LoadedImpl implements _Loaded {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
     if (loaded != null) {
-      return loaded(profile, notifLowStock, printReceiptAuto, appVersion);
+      return loaded(
+        profile,
+        notifLowStock,
+        printReceiptAuto,
+        appVersion,
+        defaultPrinter,
+      );
     }
     return orElse();
   }
@@ -591,12 +633,14 @@ abstract class _Loaded implements SettingsState {
     final bool notifLowStock,
     final bool printReceiptAuto,
     final String appVersion,
+    final PrinterSettings? defaultPrinter,
   }) = _$LoadedImpl;
 
   StoreProfile get profile;
   bool get notifLowStock;
   bool get printReceiptAuto;
   String get appVersion;
+  PrinterSettings? get defaultPrinter;
 
   /// Create a copy of SettingsState
   /// with the given fields replaced by the non-null parameter values.
@@ -682,6 +726,7 @@ class _$ErrorImpl implements _Error {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )
     loaded,
     required TResult Function(String message) error,
@@ -699,6 +744,7 @@ class _$ErrorImpl implements _Error {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult? Function(String message)? error,
@@ -716,6 +762,7 @@ class _$ErrorImpl implements _Error {
       bool notifLowStock,
       bool printReceiptAuto,
       String appVersion,
+      PrinterSettings? defaultPrinter,
     )?
     loaded,
     TResult Function(String message)? error,

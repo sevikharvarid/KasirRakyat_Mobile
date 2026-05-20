@@ -5,6 +5,7 @@ import 'package:kasir_rakyat/features/settings/cubit/settings_cubit.dart';
 import 'package:kasir_rakyat/features/settings/cubit/settings_state.dart';
 import 'package:kasir_rakyat/features/settings/models/store_profile.dart';
 import 'package:kasir_rakyat/features/settings/repository/settings_repository.dart';
+import 'package:kasir_rakyat/features/settings/screens/printer_setup_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -49,11 +50,19 @@ class _SettingsView extends StatelessWidget {
                   loading: () => const Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   ),
-                  loaded: (profile, notifLowStock, printReceiptAuto, _) =>
+                  loaded:
+                      (
+                        profile,
+                        notifLowStock,
+                        printReceiptAuto,
+                        _,
+                        defaultPrinter,
+                      ) =>
                       _LoadedBody(
                         profile: profile,
                         notifLowStock: notifLowStock,
                         printReceiptAuto: printReceiptAuto,
+                        defaultPrinterName: defaultPrinter?.name,
                       ),
                   error: (message) => Center(
                     child: Column(
@@ -141,11 +150,13 @@ class _LoadedBody extends StatelessWidget {
   final StoreProfile profile;
   final bool notifLowStock;
   final bool printReceiptAuto;
+  final String? defaultPrinterName;
 
   const _LoadedBody({
     required this.profile,
     required this.notifLowStock,
     required this.printReceiptAuto,
+    this.defaultPrinterName,
   });
 
   @override
@@ -177,8 +188,17 @@ class _LoadedBody extends StatelessWidget {
               icon: Icons.print_outlined,
               iconColor: AppColors.warning,
               title: 'Pengaturan Printer',
-              subtitle: 'Bluetooth Thermal',
-              onTap: () {},
+              subtitle: defaultPrinterName != null
+                  ? 'Default: $defaultPrinterName'
+                  : 'Bluetooth Thermal',
+              onTap: () async {
+                final updated = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(builder: (_) => const PrinterSetupScreen()),
+                );
+                if (updated == true && context.mounted) {
+                  context.read<SettingsCubit>().loadSettings();
+                }
+              },
             ),
           ],
         ),
