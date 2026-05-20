@@ -23,10 +23,14 @@ class _CartScreenState extends State<CartScreen> {
   PaymentMethod _method = PaymentMethod.tunai;
   int _amountReceived = 0;
   final _amountController = TextEditingController();
+  final _customerNameController = TextEditingController();
+  final _customerPhoneController = TextEditingController();
 
   @override
   void dispose() {
     _amountController.dispose();
+    _customerNameController.dispose();
+    _customerPhoneController.dispose();
     super.dispose();
   }
 
@@ -59,6 +63,9 @@ class _CartScreenState extends State<CartScreen> {
 
     final profile = SettingsRepository.instance.getProfileSync();
 
+    final customerName = _customerNameController.text.trim();
+    final customerPhone = _customerPhoneController.text.trim();
+
     final receiptData = ReceiptData(
       transactionId: id,
       createdAt: now,
@@ -81,6 +88,8 @@ class _CartScreenState extends State<CartScreen> {
       paymentMethod: _method,
       amountPaid: _method == PaymentMethod.tunai ? _amountReceived : total,
       change: change,
+      customerName: customerName.isNotEmpty ? customerName : null,
+      customerPhone: customerPhone.isNotEmpty ? customerPhone : null,
     );
 
     // Record transaction to shared store so Reports can read real data
@@ -106,8 +115,13 @@ class _CartScreenState extends State<CartScreen> {
         paymentMethod: _method,
         amountPaid: _method == PaymentMethod.tunai ? _amountReceived : total,
         change: change,
+        customerName: customerName.isNotEmpty ? customerName : null,
+        customerPhone: customerPhone.isNotEmpty ? customerPhone : null,
       ),
     );
+
+    // Save receipt to history
+    AppDataStore.instance.addReceipt(receiptData);
 
     context.read<CartCubit>().clearCart();
 
@@ -139,6 +153,11 @@ class _CartScreenState extends State<CartScreen> {
                       _CartHeader(totalItems: state.totalItems),
                       const SizedBox(height: 12),
                       _ItemsList(state: state),
+                      const SizedBox(height: 20),
+                      _CustomerInfoSection(
+                        nameController: _customerNameController,
+                        phoneController: _customerPhoneController,
+                      ),
                       const SizedBox(height: 20),
                       _PaymentMethodSection(
                         selected: _method,
@@ -608,6 +627,115 @@ class _OrderSummary extends StatelessWidget {
               'Pastikan nominal pembayaran sudah sesuai.',
               style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
               textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CustomerInfoSection extends StatelessWidget {
+  final TextEditingController nameController;
+  final TextEditingController phoneController;
+
+  const _CustomerInfoSection({
+    required this.nameController,
+    required this.phoneController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'INFORMASI PELANGGAN',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: nameController,
+            textCapitalization: TextCapitalization.words,
+            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+            decoration: InputDecoration(
+              hintText: 'Nama pelanggan (opsional)',
+              hintStyle: const TextStyle(color: AppColors.textTertiary),
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
+              filled: true,
+              fillColor: AppColors.primarySurface,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: phoneController,
+            keyboardType: TextInputType.phone,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
+            decoration: InputDecoration(
+              hintText: 'Nomor HP pelanggan (opsional)',
+              hintStyle: const TextStyle(color: AppColors.textTertiary),
+              prefixIcon: const Icon(
+                Icons.phone_outlined,
+                size: 20,
+                color: AppColors.textSecondary,
+              ),
+              filled: true,
+              fillColor: AppColors.primarySurface,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
         ],

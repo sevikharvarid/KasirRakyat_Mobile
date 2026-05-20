@@ -4,6 +4,7 @@ import 'package:kasir_rakyat/core/constants/app_colors.dart';
 import 'package:kasir_rakyat/core/models/category.dart';
 import 'package:kasir_rakyat/core/models/product.dart';
 import 'package:kasir_rakyat/core/widgets/kr_shimmer.dart';
+import 'package:kasir_rakyat/features/order_history/screens/order_history_screen.dart';
 import 'package:kasir_rakyat/features/pos/cubit/cart_cubit.dart';
 import 'package:kasir_rakyat/features/pos/cubit/cart_state.dart';
 import 'package:kasir_rakyat/features/pos/cubit/pos_cubit.dart';
@@ -149,6 +150,22 @@ class _PosAppBar extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
                 const Spacer(),
+                IconButton(
+                  icon: const Icon(
+                    Icons.history_outlined,
+                    color: AppColors.textSecondary,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const OrderHistoryScreen(),
+                      ),
+                    );
+                  },
+                  tooltip: 'Riwayat Order',
+                ),
+                const SizedBox(width: 4),
                 Container(
                   width: 40,
                   height: 40,

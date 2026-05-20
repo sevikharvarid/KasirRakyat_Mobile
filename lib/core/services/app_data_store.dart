@@ -1,6 +1,7 @@
 import 'package:kasir_rakyat/core/models/category.dart';
 import 'package:kasir_rakyat/core/models/product.dart';
 import 'package:kasir_rakyat/features/pos/models/payment_method.dart';
+import 'package:kasir_rakyat/features/pos/models/receipt_data.dart';
 
 /// In-memory singleton shared by all repositories (POS, Products, Reports).
 /// Replaces the previously isolated mocks so that data is consistent across
@@ -61,6 +62,9 @@ class AppDataStore {
   // ── Transactions ─────────────────────────────────────────────────────────────
   final List<AppTransaction> transactions = [];
 
+  // ── Order History (Riwayat Order) ────────────────────────────────────────────
+  final List<ReceiptData> receipts = [];
+
   // ── Products API ─────────────────────────────────────────────────────────────
   void saveProduct(Product product) {
     final idx = products.indexWhere((p) => p.id == product.id);
@@ -72,6 +76,9 @@ class AppDataStore {
   }
 
   void deleteProduct(int id) => products.removeWhere((p) => p.id == id);
+
+  // ── Order History API ─────────────────────────────────────────────────────────
+  void addReceipt(ReceiptData receipt) => receipts.insert(0, receipt);
 
   // ── Transactions API ─────────────────────────────────────────────────────────
   void recordTransaction(AppTransaction tx) {
@@ -100,6 +107,8 @@ class AppTransaction {
   final PaymentMethod paymentMethod;
   final int amountPaid;
   final int change;
+  final String? customerName;
+  final String? customerPhone;
 
   const AppTransaction({
     required this.id,
@@ -111,6 +120,8 @@ class AppTransaction {
     required this.paymentMethod,
     required this.amountPaid,
     required this.change,
+    this.customerName,
+    this.customerPhone,
   });
 }
 

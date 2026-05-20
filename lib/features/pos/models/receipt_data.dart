@@ -27,6 +27,8 @@ class ReceiptData {
   final PaymentMethod paymentMethod;
   final int amountPaid;
   final int change;
+  final String? customerName;
+  final String? customerPhone;
 
   const ReceiptData({
     required this.transactionId,
@@ -41,5 +43,7 @@ class ReceiptData {
     required this.paymentMethod,
     required this.amountPaid,
     required this.change,
+    this.customerName,
+    this.customerPhone,
   });
 }

@@ -1,16 +1,30 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:kasir_rakyat/core/constants/app_colors.dart';
 import 'package:kasir_rakyat/core/services/printer_service.dart';
 import 'package:kasir_rakyat/core/utils/currency_formatter.dart';
+import 'package:kasir_rakyat/features/order_history/screens/order_history_screen.dart';
 import 'package:kasir_rakyat/features/pos/models/payment_method.dart';
 import 'package:kasir_rakyat/features/pos/models/receipt_data.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ReceiptScreen extends StatelessWidget {
+class ReceiptScreen extends StatefulWidget {
   final ReceiptData data;
+  final bool isHistory;
 
-  const ReceiptScreen({super.key, required this.data});
+  const ReceiptScreen({super.key, required this.data, this.isHistory = false});
+
+  @override
+  State<ReceiptScreen> createState() => _ReceiptScreenState();
+}
+
+class _ReceiptScreenState extends State<ReceiptScreen> {
+  final _receiptKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -18,19 +32,28 @@ class ReceiptScreen extends StatelessWidget {
       backgroundColor: AppColors.primarySurface,
       body: Column(
         children: [
-          const _Header(),
+          _Header(isHistory: widget.isHistory),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
               child: Column(
                 children: [
-                  _SuccessSection(),
+                  _SuccessSection(isHistory: widget.isHistory),
                   const SizedBox(height: 20),
-                  _ReceiptCard(data: data),
+                  RepaintBoundary(
+                    key: _receiptKey,
+                    child: _ReceiptCard(data: widget.data),
+                  ),
                   const SizedBox(height: 20),
-                  _ActionButtons(data: data),
-                  const SizedBox(height: 20),
-                  const _PromoBanner(),
+                  _ActionButtons(
+                    data: widget.data,
+                    isHistory: widget.isHistory,
+                    receiptKey: _receiptKey,
+                  ),
+                  if (!widget.isHistory) ...[
+                    const SizedBox(height: 20),
+                    const _PromoBanner(),
+                  ],
                 ],
               ),
             ),
@@ -42,7 +65,9 @@ class ReceiptScreen extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header();
+  final bool isHistory;
+
+  const _Header({this.isHistory = false});
 
   @override
   Widget build(BuildContext context) {
@@ -59,12 +84,41 @@ class _Header extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Image.asset(
-                  'assets/images/app_logo.png',
-                  height: 40,
-                  fit: BoxFit.contain,
-                ),
+                if (isHistory)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: AppColors.textPrimary,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  )
+                else
+                  Image.asset(
+                    'assets/images/app_logo.png',
+                    height: 40,
+                    fit: BoxFit.contain,
+                  ),
+                if (isHistory) ...[
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Struk Pesanan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
                 const Spacer(),
+                if (!isHistory)
+                  Image.asset(
+                    'assets/images/app_logo.png',
+                    height: 40,
+                    fit: BoxFit.contain,
+                    color: Colors.transparent,
+                  ),
               ],
             ),
           ),
@@ -75,8 +129,35 @@ class _Header extends StatelessWidget {
 }
 
 class _SuccessSection extends StatelessWidget {
+  final bool isHistory;
+
+  const _SuccessSection({this.isHistory = false});
+
   @override
   Widget build(BuildContext context) {
+    if (isHistory) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          children: [
+            Icon(
+              Icons.receipt_long_outlined,
+              size: 28,
+              color: AppColors.primary,
+            ),
+            SizedBox(width: 10),
+            Text(
+              'Detail Struk',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 28),
       child: Column(
@@ -147,6 +228,12 @@ class _ReceiptCard extends StatelessWidget {
           const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 14),
           _TransactionMeta(data: data),
+          if (data.customerName != null || data.customerPhone != null) ...[
+            const SizedBox(height: 14),
+            const Divider(color: AppColors.border, height: 1),
+            const SizedBox(height: 14),
+            _CustomerSection(data: data),
+          ],
           const SizedBox(height: 14),
           const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: 14),
@@ -196,6 +283,65 @@ class _StoreHeader extends StatelessWidget {
               color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _CustomerSection extends StatelessWidget {
+  final ReceiptData data;
+
+  const _CustomerSection({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Pelanggan',
+          style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 6),
+        if (data.customerName != null)
+          Row(
+            children: [
+              const Icon(
+                Icons.person_outline,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                data.customerName!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        if (data.customerPhone != null) ...[
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(
+                Icons.phone_outlined,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                data.customerPhone!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ],
       ],
@@ -471,8 +617,14 @@ class _PaymentRow extends StatelessWidget {
 
 class _ActionButtons extends StatelessWidget {
   final ReceiptData data;
+  final bool isHistory;
+  final GlobalKey receiptKey;
 
-  const _ActionButtons({required this.data});
+  const _ActionButtons({
+    required this.data,
+    required this.receiptKey,
+    this.isHistory = false,
+  });
 
   String _buildReceiptText() {
     final dateStr = DateFormat(
@@ -487,10 +639,14 @@ class _ActionButtons extends StatelessWidget {
     buf.writeln('─────────────────────');
     buf.writeln('ID: ${data.transactionId}');
     buf.writeln('Tanggal: $dateStr');
+    if (data.customerName != null)
+      buf.writeln('Pelanggan: ${data.customerName}');
+    if (data.customerPhone != null)
+      buf.writeln('No. HP: ${data.customerPhone}');
     buf.writeln('─────────────────────');
 
     for (final item in data.items) {
-      buf.writeln('${item.name}');
+      buf.writeln(item.name);
       buf.writeln(
         '  ${item.quantity} x ${formatRupiah(item.unitPrice)} = ${formatRupiah(item.subtotal)}',
       );
@@ -498,26 +654,57 @@ class _ActionButtons extends StatelessWidget {
 
     buf.writeln('─────────────────────');
     buf.writeln('Subtotal: ${formatRupiah(data.subtotal)}');
-    if (data.tax > 0) {
-      buf.writeln('Pajak: ${formatRupiah(data.tax)}');
-    }
+    if (data.tax > 0) buf.writeln('Pajak: ${formatRupiah(data.tax)}');
     buf.writeln('*Total: ${formatRupiah(data.total)}*');
     buf.writeln('');
     buf.writeln(
       'Bayar (${data.paymentMethod.label}): ${formatRupiah(data.amountPaid)}',
     );
-    if (data.change > 0) {
-      buf.writeln('Kembalian: ${formatRupiah(data.change)}');
-    }
+    if (data.change > 0) buf.writeln('Kembalian: ${formatRupiah(data.change)}');
     buf.writeln('─────────────────────');
     buf.writeln('Terima kasih! 🙏');
 
     return buf.toString();
   }
 
-  Future<void> _shareReceipt(BuildContext context) async {
-    final text = _buildReceiptText();
-    await Share.share(text);
+  Future<void> _shareAsText(BuildContext context) async {
+    await Share.share(_buildReceiptText());
+  }
+
+  Future<void> _shareAsImage(BuildContext context) async {
+    try {
+      final boundary =
+          receiptKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+      if (boundary == null) return;
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return;
+
+      final bytes = byteData.buffer.asUint8List();
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        '${dir.path}/struk_${data.transactionId.replaceAll('-', '_')}.png',
+      );
+      await file.writeAsBytes(bytes);
+
+      if (context.mounted) {
+        await Share.shareXFiles([
+          XFile(file.path),
+        ], text: 'Struk Belanja - ${data.storeName}');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal membuat gambar struk: $e'),
+            backgroundColor: AppColors.danger,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -531,9 +718,9 @@ class _ActionButtons extends StatelessWidget {
             onPressed: () =>
                 PrinterService.printReceipt(context: context, data: data),
             icon: const Icon(Icons.bluetooth, color: Colors.white, size: 20),
-            label: const Text(
-              'Cetak Struk (Bluetooth)',
-              style: TextStyle(
+            label: Text(
+              isHistory ? 'Cetak Ulang Struk' : 'Cetak Struk (Bluetooth)',
+              style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
@@ -555,14 +742,14 @@ class _ActionButtons extends StatelessWidget {
               child: SizedBox(
                 height: 48,
                 child: OutlinedButton.icon(
-                  onPressed: () => _shareReceipt(context),
+                  onPressed: () => _shareAsText(context),
                   icon: const Icon(
-                    Icons.share_outlined,
+                    Icons.chat_outlined,
                     size: 18,
                     color: AppColors.textPrimary,
                   ),
                   label: const Text(
-                    'Bagikan WhatsApp',
+                    'Bagikan Teks',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -582,40 +769,134 @@ class _ActionButtons extends StatelessWidget {
             Expanded(
               child: SizedBox(
                 height: 48,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Pop back to POS screen
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  },
+                child: OutlinedButton.icon(
+                  onPressed: () => _shareAsImage(context),
                   icon: const Icon(
-                    Icons.add_circle_outline,
+                    Icons.image_outlined,
                     size: 18,
-                    color: Colors.white,
+                    color: AppColors.primary,
                   ),
                   label: const Text(
-                    'Transaksi Baru',
+                    'Bagikan Gambar',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white,
+                      color: AppColors.primary,
                     ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.warning,
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    elevation: 0,
                   ),
                 ),
               ),
             ),
           ],
         ),
+        const SizedBox(height: 12),
+        if (isHistory)
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(
+                Icons.arrow_back,
+                size: 18,
+                color: AppColors.textPrimary,
+              ),
+              label: const Text(
+                'Kembali',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.border),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const OrderHistoryScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.history_outlined,
+                      size: 18,
+                      color: AppColors.textPrimary,
+                    ),
+                    label: const Text(
+                      'Riwayat Order',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    icon: const Icon(
+                      Icons.add_circle_outline,
+                      size: 18,
+                      color: Colors.white,
+                    ),
+                    label: const Text(
+                      'Transaksi Baru',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.warning,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }
 }
+
 
 class _PromoBanner extends StatelessWidget {
   const _PromoBanner();
